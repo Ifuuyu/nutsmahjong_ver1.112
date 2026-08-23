@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ナッツ麻雀清算用</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 15px;
+      font-size: 18px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    .result {
+      font-size: 20px;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    .screen {
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>ナッツ麻雀 清算用</h2>
+
+  <div id="name-input-screen" class="screen">
+    <h3>プレイヤー名入力</h3>
+    <label>プレイヤー1</label>
+    <input type="text" id="name1" placeholder="名前を入力">
+    <label>プレイヤー2</label>
+    <input type="text" id="name2" placeholder="名前を入力">
+    <label>プレイヤー3</label>
+    <input type="text" id="name3" placeholder="名前を入力">
+    <label>プレイヤー4</label>
+    <input type="text" id="name4" placeholder="名前を入力">
+    <button onclick="startGame()">点数入力へ</button>
+  </div>
+
+  <div id="score-input-screen" class="screen" style="display: none;">
+    <label id="p1-label">プレイヤーA 持ち点</label>
+    <input type="number" id="p1" placeholder="例：43200">
+
+    <label id="p2-label">プレイヤーB 持ち点</label>
+    <input type="number" id="p2" placeholder="例：17800">
+
+    <label id="p3-label">プレイヤーC 持ち点</label>
+    <input type="number" id="p3" placeholder="例：25000">
+
+    <label id="p4-label">プレイヤーD 持ち点</label>
+    <input type="number" id="p4" placeholder="例：14000">
+
+    <button onclick="nextRound()">この結果を保存し次の局へ</button>
+    <button onclick="showIntermediateProgress()">途中経過を表示</button>
+    <button onclick="tallyResults()">集計する</button>
+
+    <div id="result"></div>
+  </div>
+
+  <div id="intermediate-progress-screen" class="screen" style="display: none;">
+    <h3>途中経過</h3>
+    <div id="intermediate-table"></div>
+    <button onclick="backToScoreInput()">戻る</button>
+  </div>
+
+  <script>
+    let playerNames = [];
+    let allRoundsScores = [];
+    const base = 25000;
+
+    function startGame() {
+      playerNames = [
+        document.getElementById("name1").value || "プレイヤー1",
+        document.getElementById("name2").value || "プレイヤー2",
+        document.getElementById("name3").value || "プレイヤー3",
+        document.getElementById("name4").value || "プレイヤー4",
+      ];
+
+      document.getElementById("p1-label").innerText = `${playerNames[0]} 持ち点`;
+      document.getElementById("p2-label").innerText = `${playerNames[1]} 持ち点`;
+      document.getElementById("p3-label").innerText = `${playerNames[2]} 持ち点`;
+      document.getElementById("p4-label").innerText = `${playerNames[3]} 持ち点`;
+
+      document.getElementById("name-input-screen").style.display = "none";
+      document.getElementById("score-input-screen").style.display = "block";
+      hideIntermediateProgress();
+    }
+
+    function nextRound() {
+      const rawPoints = [
+        Number(document.getElementById("p1").value),
+        Number(document.getElementById("p2").value),
+        Number(document.getElementById("p3").value),
+        Number(document.getElementById("p4").value),
+      ];
+
+      if (rawPoints.some(p => isNaN(p))) {
+        document.getElementById("result").innerHTML = "<h3>全プレイヤーの点数を正しく入力してください。</h3>";
+        return;
+      }
+
+      // --- 順位ボーナス計算 ---
+      const rankBonuses = [20000, 10000, -10000, -20000];
+      const players = rawPoints.map((score, index) => ({ score, originalIndex: index }));
+      players.sort((a, b) => b.score - a.score);
+
+      const finalBonuses = new Array(4);
+      let rank = 0;
+      for (let i = 0; i < players.length; i++) {
+        if (i > 0 && players[i].score < players[i-1].score) {
+          rank = i;
+        }
+        finalBonuses[players[i].originalIndex] = rankBonuses[rank];
+      }
+      // --- ここまで ---
+
+      const roundPoints = rawPoints.map((score, index) => score + finalBonuses[index]);
+      allRoundsScores.push({ raw: rawPoints, final: roundPoints });
+
+      // Clear input fields
+      document.getElementById("p1").value = "";
+      document.getElementById("p2").value = "";
+      document.getElementById("p3").value = "";
+      document.getElementById("p4").value = "";
+
+      document.getElementById("result").innerHTML = `<h3>${allRoundsScores.length}局目の結果を保存しました。</h3>`;
+    }
+
+    function showIntermediateProgress() {
+      if (allRoundsScores.length === 0) {
+        document.getElementById("result").innerHTML = "<h3>表示する途中経過データがありません。</h3>";
+        return;
+      }
+
+      document.getElementById("score-input-screen").style.display = "none";
+      document.getElementById("intermediate-progress-screen").style.display = "block";
+
+      let tableHtml = `<table border="1" style="width:100%; text-align:center; border-collapse: collapse;"><tr><th>局</th>`;
+      playerNames.forEach(name => {
+        tableHtml += `<th>${name}</th>`;
+      });
+      tableHtml += `</tr>`;
+
+      allRoundsScores.forEach((round, roundIndex) => {
+        tableHtml += `<tr><td>${roundIndex + 1}</td>`;
+        round.raw.forEach(score => {
+          tableHtml += `<td>${score}</td>`;
+        });
+        tableHtml += `</tr>`;
+      });
+
+      tableHtml += `</table>`;
+      document.getElementById("intermediate-table").innerHTML = tableHtml;
+    }
+
+    function backToScoreInput() {
+        document.getElementById("intermediate-progress-screen").style.display = "none";
+        document.getElementById("score-input-screen").style.display = "block";
+    }
+    
+    function hideIntermediateProgress() {
+        document.getElementById("intermediate-progress-screen").style.display = "none";
+    }
+
+    function tallyResults() {
+      if (allRoundsScores.length === 0) {
+        document.getElementById("result").innerHTML = "<h3>集計する対局データがありません。</h3>";
+        return;
+      }
+
+      const finalScores = [0, 0, 0, 0];
+      allRoundsScores.forEach(round => {
+        round.final.forEach((score, i) => {
+          finalScores[i] += score;
+        });
+      });
+
+      let html = `<h3>最終結果 (${allRoundsScores.length}局合計)</h3>`;
+      const totalBase = base * allRoundsScores.length;
+      finalScores.forEach((p, i) => {
+        const diff = (p - totalBase) / 10;
+        const sign = diff > 0 ? "+" : "";
+        html += `${playerNames[i]}: ${sign}${diff} 円<br>`;
+      });
+
+      document.getElementById("result").innerHTML = html;
+    }
+  </script>
+</body>
+</html>
