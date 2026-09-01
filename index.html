@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>ナッツ麻雀清算用</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <h2>なっつ麻雀部</h2>
+
+  <!-- ==========================================
+       メインメニュー
+       ========================================== -->
+
+  <div id="main-menu-screen" class="screen">
+
+```
+<h3>メニュー</h3>
+
+<button onclick="showGameStart()">
+  対局開始
+</button>
+
+<button onclick="showStatistics()">
+  データ・収支閲覧
+</button>
+
+<button onclick="showGameHistory()">
+  対局履歴閲覧
+</button>
+
+<button onclick="showPlayerManagement()">
+  プレイヤー管理
+</button>
+```
+
+  </div>
+
+  <!-- ==========================================
+       プレイヤー管理
+       ========================================== -->
+
+  <div id="player-management-screen"
+       class="screen"
+       style="display: none;">
+
+```
+<h3>プレイヤー管理</h3>
+
+<label>
+  プレイヤー名
+</label>
+
+<input
+  type="text"
+  id="new-player-name"
+  placeholder="名前を入力">
+
+<button onclick="addPlayer()">
+  プレイヤーを追加
+</button>
+
+<h4>登録済みプレイヤー</h4>
+
+<div id="player-list"></div>
+
+<button onclick="showMainMenu()">
+  メニューに戻る
+</button>
+```
+
+  </div>
+
+  <!-- ==========================================
+       対局開始・プレイヤー選択
+       ========================================== -->
+
+  <div id="name-input-screen"
+       class="screen"
+       style="display: none;">
+
+```
+<h3>プレイヤー選択</h3>
+
+<label>
+  プレイヤー1
+</label>
+
+<select id="player-select-1"></select>
+
+
+<label>
+  プレイヤー2
+</label>
+
+<select id="player-select-2"></select>
+
+
+<label>
+  プレイヤー3
+</label>
+
+<select id="player-select-3"></select>
+
+
+<label>
+  プレイヤー4
+</label>
+
+<select id="player-select-4"></select>
+
+
+<button onclick="startGame()">
+  点数入力へ
+</button>
+
+<button onclick="showMainMenu()">
+  戻る
+</button>
+```
+
+  </div>
+
+  <!-- ==========================================
+       点数入力
+       ========================================== -->
+
+  <div id="score-input-screen"
+       class="screen"
+       style="display: none;">
+
+```
+<h3>点数入力</h3>
+
+
+<label id="p1-label">
+  プレイヤー1 持ち点
+</label>
+
+<input
+  type="number"
+  id="p1"
+  placeholder="例：43200">
+
+
+<label id="p2-label">
+  プレイヤー2 持ち点
+</label>
+
+<input
+  type="number"
+  id="p2"
+  placeholder="例：17800">
+
+
+<label id="p3-label">
+  プレイヤー3 持ち点
+</label>
+
+<input
+  type="number"
+  id="p3"
+  placeholder="例：25000">
+
+
+<label id="p4-label">
+  プレイヤー4 持ち点
+</label>
+
+<input
+  type="number"
+  id="p4"
+  placeholder="例：14000">
+
+
+<button onclick="nextRound()">
+  この結果を保存し次の対局へ
+</button>
+
+<button onclick="showIntermediateProgress()">
+  途中経過を表示
+</button>
+
+<button onclick="tallyResults()">
+  集計する
+</button>
+
+
+<div id="result"></div>
+```
+
+  </div>
+
+  <!-- ==========================================
+       点数合計チェック
+       ========================================== -->
+
+  <div id="score-check-screen"
+       class="screen"
+       style="display: none;">
+
+```
+<h3>点数確認</h3>
+
+<div id="score-check-message"></div>
+
+
+<button onclick="backToScoreInputForCorrection()">
+  点数を入力し直す
+</button>
+
+
+<button onclick="continueWithInvalidTotal()">
+  このまま続行する
+</button>
+```
+
+  </div>
+
+  <!-- ==========================================
+       途中経過
+       ========================================== -->
+
+  <div id="intermediate-progress-screen"
+       class="screen"
+       style="display: none;">
+
+```
+<h3>途中経過</h3>
+
+<div id="intermediate-table"></div>
+
+
+<button onclick="backToScoreInput()">
+  戻る
+</button>
+```
+
+  </div>
+
+  <!-- ==========================================
+       対局結果
+       ========================================== -->
+
+  <div id="game-result-screen"
+       class="screen"
+       style="display: none;">
+
+```
+<h3>対局結果</h3>
+
+<div id="game-result"></div>
+
+
+<button onclick="saveGameResult()">
+  この対局結果を保存
+</button>
+
+
+<button onclick="showMainMenu()">
+  メニューに戻る
+</button>
+```
+
+  </div>
+
+  <!-- ==========================================
+       成績閲覧
+       ========================================== -->
+
+  <div id="statistics-screen"
+       class="screen"
+       style="display: none;">
+
+```
+<h3>成績</h3>
+
+<div id="statistics-table"></div>
+
+
+<button onclick="clearGameHistory()">
+  成績データを削除
+</button>
+
+
+<button onclick="showMainMenu()">
+  メニューに戻る
+</button>
+```
+
+  </div>
+
+  <!-- ==========================================
+       対局履歴
+       ========================================== -->
+
+  <div id="history-screen"
+       class="screen"
+       style="display: none;">
+
+```
+<h3>対局履歴</h3>
+
+<div id="history-list"></div>
+
+
+<button onclick="showMainMenu()">
+  メニューに戻る
+</button>
+```
+
+  </div>
+
+  <!-- ==========================================
+       各局詳細
+       ========================================== -->
+
+  <div id="round-detail-screen"
+       class="screen"
+       style="display: none;">
+
+```
+<h3 id="round-detail-title">
+  各半荘の詳細
+</h3>
+
+
+<div id="round-detail-content"></div>
+
+
+<button onclick="backToHistory()">
+  対局履歴に戻る
+</button>
+```
+
+  </div>
+
+  <!-- ==========================================
+       JavaScript
+       ========================================== -->
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
