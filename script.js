@@ -11,7 +11,7 @@ let currentGameResult = null;
 // 点数確認画面で一時的に保持する点数
 let pendingRawPoints = null;
 
-const base = 25000;
+const base = 30000;
 
 const STORAGE_KEY = "mahjongGameHistory";
 
@@ -533,10 +533,10 @@ function saveRound(rawPoints) {
   // ========================================
 
   const rankBonuses = [
-    20000,
+    50000,
     10000,
     -10000,
-    -20000
+    -30000
   ];
 
 
